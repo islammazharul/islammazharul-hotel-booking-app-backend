@@ -13,6 +13,10 @@ const moduleRoutes = [
     path: '/hotels',
     route: hotelRoutes,
   },
+  {
+    path: '/my-bookings',
+    route: hotelRoutes,
+  },
 ];
 
 moduleRoutes.forEach((route) => router.use(route.path, route.route));

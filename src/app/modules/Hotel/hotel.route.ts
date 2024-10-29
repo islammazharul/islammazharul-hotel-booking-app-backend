@@ -13,4 +13,9 @@ router.post(
     hotelController.createHotel;
   },
 );
+
+router.get('/search', hotelController.searchHotel);
+router.get('/', hotelController.getAllHotel);
+router.get('/:id', hotelController.getAllHotel);
+router.get('/', hotelController.getMyBookingHotel);
 export const hotelRoutes = router;

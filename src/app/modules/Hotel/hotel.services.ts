@@ -59,7 +59,49 @@ const searchHotelFromDb = async (payload: any) => {
     console.log('error', error);
   }
 };
+
+const getAllHotelFromDb = async () => {
+  try {
+    const hotels = await Hotel.find().sort('-lastUpdated');
+    return hotels;
+  } catch (error) {
+    console.log('error', error);
+  }
+};
+
+const getSingleHotelFromDb = async (id: string) => {
+  const result = await Hotel.findById(id);
+  return result;
+};
+
+const getMyBookingHotelFromDb = async (userId: string) => {
+  try {
+    const hotels = await Hotel.find({
+      bookings: { $elemMatch: { userId } },
+    });
+
+    const results = hotels.map((hotel: any) => {
+      const userBookings = hotel.bookings.filter(
+        (booking: any) => booking.userId === userId,
+      );
+
+      const hotelWithUserBookings: HotelType = {
+        ...hotel.toObject(),
+        bookings: userBookings,
+      };
+
+      return hotelWithUserBookings;
+    });
+    return results;
+  } catch (error) {
+    console.log(error);
+    console.log({ message: 'Unable to fetch bookings' });
+  }
+};
 export const hotelServices = {
   createHotelIntoDb,
   searchHotelFromDb,
+  getAllHotelFromDb,
+  getSingleHotelFromDb,
+  getMyBookingHotelFromDb,
 };

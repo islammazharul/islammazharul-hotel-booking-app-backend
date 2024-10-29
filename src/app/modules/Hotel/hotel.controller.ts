@@ -28,7 +28,46 @@ const searchHotel = catchAsync(async (req, res) => {
     data: result,
   });
 });
+
+const getAllHotel = catchAsync(async (req, res) => {
+  // const data = req.query;
+  const result = await hotelServices.getAllHotelFromDb();
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Hotel is retrieved successfully',
+    data: result,
+  });
+});
+
+const getSingleHotel = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const result = await hotelServices.getSingleHotelFromDb(id);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Hotel is retrieved successfully',
+    data: result,
+  });
+});
+
+const getMyBookingHotel = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  const result = await hotelServices.getMyBookingHotelFromDb(userId);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Hotel is retrieved successfully',
+    data: result,
+  });
+});
 export const hotelController = {
   createHotel,
   searchHotel,
+  getAllHotel,
+  getSingleHotel,
+  getMyBookingHotel,
 };
