@@ -28,11 +28,11 @@ export const searchQueryBuilder = (queryParams: any) => {
     };
   }
 
-  if (queryParams.types) {
+  if (queryParams.type) {
     constructedQuery.type = {
-      $in: Array.isArray(queryParams.types)
-        ? queryParams.types
-        : [queryParams.types],
+      $in: Array.isArray(queryParams.type)
+        ? queryParams.type
+        : [queryParams.type],
     };
   }
 

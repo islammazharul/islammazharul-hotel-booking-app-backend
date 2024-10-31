@@ -7,6 +7,7 @@ import { hotelServices } from './hotel.services';
 const createHotel = catchAsync(async (req, res) => {
   const imageFiles = req.files as Express.Multer.File[];
   const newHotel: HotelType = req.body;
+  // console.log(imageFiles, newHotel);
   const result = await hotelServices.createHotelIntoDb(imageFiles, newHotel);
 
   sendResponse(res, {
@@ -24,7 +25,7 @@ const searchHotel = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: 'Hotel is retrieved successfully',
+    message: 'Hotel is retrieved successfully...',
     data: result,
   });
 });
@@ -64,10 +65,48 @@ const getMyBookingHotel = catchAsync(async (req, res) => {
     data: result,
   });
 });
+
+const paymentIntent = catchAsync(async (req, res) => {
+  const { numberOfNights, userId } = req.body;
+  const hotelId = req.params.hotelId;
+  const result = await hotelServices.paymentIntentIntoDb(
+    numberOfNights,
+    hotelId,
+    userId,
+  );
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Payment intent successfully',
+    data: result,
+  });
+});
+
+const bookingIntent = catchAsync(async (req, res) => {
+  const { paymentIntentId, userId } = req.body;
+  const hotelId = req.params.hotelId;
+  const body = req.body;
+  const result = await hotelServices.bookingIntentIntoDb(
+    paymentIntentId,
+    userId,
+    hotelId,
+    body,
+  );
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Booking intent successfully',
+    data: result,
+  });
+});
 export const hotelController = {
   createHotel,
   searchHotel,
   getAllHotel,
   getSingleHotel,
   getMyBookingHotel,
+  paymentIntent,
+  bookingIntent,
 };
