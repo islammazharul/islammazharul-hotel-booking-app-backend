@@ -4,20 +4,6 @@ import { HotelType } from './hotel.interface';
 import { hotelServices } from './hotel.services';
 // import httpStatus from 'http-status';
 
-const createHotel = catchAsync(async (req, res) => {
-  const imageFiles = req.files as Express.Multer.File[];
-  const newHotel: HotelType = req.body;
-  // console.log(imageFiles, newHotel);
-  const result = await hotelServices.createHotelIntoDb(imageFiles, newHotel);
-
-  sendResponse(res, {
-    statusCode: 200,
-    success: true,
-    message: 'Hotel is created successfully',
-    data: result,
-  });
-});
-
 const searchHotel = catchAsync(async (req, res) => {
   const query = req.query;
   const result = await hotelServices.searchHotelFromDb(query);
@@ -37,7 +23,7 @@ const getAllHotel = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: 'Hotel is retrieved successfully',
+    message: 'Hotel is retrieved successfully1',
     data: result,
   });
 });
@@ -55,7 +41,7 @@ const getSingleHotel = catchAsync(async (req, res) => {
 });
 
 const getMyBookingHotel = catchAsync(async (req, res) => {
-  const { userId } = req.params;
+  const { userId } = req.userId;
   const result = await hotelServices.getMyBookingHotelFromDb(userId);
 
   sendResponse(res, {
@@ -67,7 +53,8 @@ const getMyBookingHotel = catchAsync(async (req, res) => {
 });
 
 const paymentIntent = catchAsync(async (req, res) => {
-  const { numberOfNights, userId } = req.body;
+  const { userId } = req.userId;
+  const { numberOfNights } = req.body;
   const hotelId = req.params.hotelId;
   const result = await hotelServices.paymentIntentIntoDb(
     numberOfNights,
@@ -84,15 +71,10 @@ const paymentIntent = catchAsync(async (req, res) => {
 });
 
 const bookingIntent = catchAsync(async (req, res) => {
-  const { paymentIntentId, userId } = req.body;
-  const hotelId = req.params.hotelId;
   const body = req.body;
-  const result = await hotelServices.bookingIntentIntoDb(
-    paymentIntentId,
-    userId,
-    hotelId,
-    body,
-  );
+  const hotelId = req.params.hotelId;
+  const { userId } = req.userId;
+  const result = await hotelServices.bookingIntentIntoDb(body, userId, hotelId);
 
   sendResponse(res, {
     statusCode: 200,
@@ -102,7 +84,6 @@ const bookingIntent = catchAsync(async (req, res) => {
   });
 });
 export const hotelController = {
-  createHotel,
   searchHotel,
   getAllHotel,
   getSingleHotel,

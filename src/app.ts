@@ -2,6 +2,8 @@ import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import router from './app/routes';
 import { v2 as cloudinary } from 'cloudinary';
+import globalErrorHandler from './app/middleware/globalErrorhandler';
+import notFound from './app/middleware/notFound';
 const app: Application = express();
 
 app.use(express.json());
@@ -23,5 +25,10 @@ app.get('/', async (req: Request, res: Response) => {
     message: 'Hotel booking app is running',
   });
 });
+
+app.use(globalErrorHandler as any);
+
+//Not Found
+app.use(notFound as any);
 
 export default app;

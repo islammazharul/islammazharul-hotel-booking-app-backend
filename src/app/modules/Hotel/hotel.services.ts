@@ -1,29 +1,9 @@
 import Stripe from 'stripe';
 import AppError from '../../errors/AppError';
-import { sendImageToCloudinary } from '../../utils/sendImageToCloudinary';
 import { BookingType, HotelSearchResponse, HotelType } from './hotel.interface';
 import Hotel from './hotel.model';
 import { searchQueryBuilder } from './hotel.utils';
 const stripe = new Stripe(process.env.STRIPE_API_KEY as string);
-
-const createHotelIntoDb = async (files: any, payload: HotelType) => {
-  // console.log(files, payload);
-  try {
-    const newHotel: Partial<HotelType> = payload;
-    const imageUrls = await sendImageToCloudinary(files);
-    newHotel.imageUrls = imageUrls;
-    newHotel.lastUpdated = new Date();
-    newHotel.userId = payload.userId;
-    const hotel = await Hotel.create([newHotel]);
-    if (!hotel.length) {
-      throw new Error('Failed to create user');
-    }
-    // console.log('Hotelllll', hotel);
-    return hotel;
-  } catch (error: any) {
-    console.log(error.message);
-  }
-};
 
 const searchHotelFromDb = async (payload: any) => {
   try {
@@ -63,8 +43,8 @@ const searchHotelFromDb = async (payload: any) => {
     };
 
     return response;
-  } catch (error) {
-    console.log('error', error);
+  } catch (error: any) {
+    throw new Error(error);
   }
 };
 
@@ -72,14 +52,18 @@ const getAllHotelFromDb = async () => {
   try {
     const hotels = await Hotel.find().sort('-lastUpdated');
     return hotels;
-  } catch (error) {
-    console.log('error', error);
+  } catch (error: any) {
+    throw new Error(error);
   }
 };
 
 const getSingleHotelFromDb = async (id: string) => {
-  const result = await Hotel.findById(id);
-  return result;
+  try {
+    const result = await Hotel.findById(id);
+    return result;
+  } catch (error: any) {
+    throw new Error(error);
+  }
 };
 
 const getMyBookingHotelFromDb = async (userId: string) => {
@@ -101,9 +85,8 @@ const getMyBookingHotelFromDb = async (userId: string) => {
       return hotelWithUserBookings;
     });
     return results;
-  } catch (error) {
-    console.log(error);
-    console.log({ message: 'Unable to fetch bookings' });
+  } catch (error: any) {
+    throw new Error(error);
   }
 };
 
@@ -139,14 +122,14 @@ const paymentIntentIntoDb = async (
 };
 
 const bookingIntentIntoDb = async (
-  paymentIntentId: string,
+  // paymentIntentId: string,
   userId: string,
   hotelId: string,
-  body: BookingType,
+  body: any,
 ) => {
   try {
     const paymentIntent = await stripe.paymentIntents.retrieve(
-      paymentIntentId as string,
+      body.paymentIntentId as string,
     );
     if (!paymentIntent) {
       throw new AppError(400, 'payment intent not found');
@@ -184,11 +167,10 @@ const bookingIntentIntoDb = async (
     // console.log('Hotelllll', hotel);
     return hotel;
   } catch (error: any) {
-    console.log(error.message);
+    throw new Error(error);
   }
 };
 export const hotelServices = {
-  createHotelIntoDb,
   searchHotelFromDb,
   getAllHotelFromDb,
   getSingleHotelFromDb,

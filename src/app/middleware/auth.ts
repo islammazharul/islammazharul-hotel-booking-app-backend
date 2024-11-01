@@ -28,7 +28,7 @@ const auth = () => {
     if (!user) {
       throw new AppError(404, 'This user is not found !');
     }
-    req.user = decoded as JwtPayload;
+    req.userId = decoded as JwtPayload;
     next();
   });
 };
