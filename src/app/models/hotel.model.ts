@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { BookingType, HotelType } from '../types/hotel.type';
+import { BookingType, HotelType, ReviewType } from '../types/hotel.type';
 
 const bookingSchema = new mongoose.Schema<BookingType>({
   firstName: { type: String, required: true },
@@ -13,6 +13,12 @@ const bookingSchema = new mongoose.Schema<BookingType>({
   totalCost: { type: Number, required: true },
 });
 
+const reviewSchema = new mongoose.Schema<ReviewType>({
+  userId: { type: String },
+  rating: { type: Number, required: true },
+  message: { type: String },
+});
+
 const hotelSchema = new mongoose.Schema<HotelType>({
   userId: { type: String, required: true },
   name: { type: String, required: true },
@@ -24,7 +30,7 @@ const hotelSchema = new mongoose.Schema<HotelType>({
   childCount: { type: Number, required: true },
   facilities: [{ type: String, required: true }],
   pricePerNight: { type: Number, required: true },
-  starRating: { type: Number, required: true, min: 1, max: 5 },
+  reviews: [reviewSchema],
   imageUrls: [{ type: String, required: true }],
   lastUpdated: { type: Date, required: true },
   bookings: [bookingSchema],

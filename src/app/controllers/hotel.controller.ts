@@ -1,7 +1,11 @@
 import express, { Request, Response } from 'express';
 import Stripe from 'stripe';
 import Hotel from '../models/hotel.model';
-import { BookingType, HotelSearchResponse } from '../types/hotel.type';
+import {
+  BookingType,
+  HotelSearchResponse,
+  ReviewType,
+} from '../types/hotel.type';
 import verifyToken from '../middleware/auth';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
@@ -159,6 +163,35 @@ router.post(
         { _id: req.params.hotelId },
         {
           $push: { bookings: newBooking },
+        },
+      );
+
+      if (!hotel) {
+        return res.status(400).json({ message: 'hotel not found' });
+      }
+
+      await hotel.save();
+      res.status(200).send();
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: 'something went wrong' });
+    }
+  },
+);
+
+router.post(
+  '/:hotelId/reviews',
+  async (req: Request, res: Response): Promise<any> => {
+    try {
+      const newReview: ReviewType = {
+        ...req.body,
+        userId: req.userId,
+      };
+
+      const hotel = await Hotel.findByIdAndUpdate(
+        { _id: req.params.hotelId },
+        {
+          $push: { reviews: newReview },
         },
       );
 

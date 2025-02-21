@@ -24,6 +24,13 @@ const BookingTypeValidation = z.object({
     .optional(),
 });
 
+const ReviewTypeValidation = z.object({
+  _id: z.string().optional(),
+  userId: z.string().optional(),
+  rating: z.number().min(1).optional(),
+  message: z.string().optional(),
+});
+
 export const hotelValidationSchema = z.object({
   _id: z.string().uuid().optional(),
   userId: z.string().uuid().optional(),
@@ -50,11 +57,7 @@ export const hotelValidationSchema = z.object({
     .number()
     .nonnegative('Price per night cannot be negative')
     .optional(),
-  starRating: z
-    .number()
-    .min(0, 'Star rating cannot be negative')
-    .max(5, 'Star rating cannot exceed 5')
-    .optional(),
+  reviews: z.array(ReviewTypeValidation).optional(),
   imageUrls: z
     .array(z.string().url())
     .min(1, 'At least one image URL is required')
