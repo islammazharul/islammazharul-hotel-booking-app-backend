@@ -1,36 +1,39 @@
-import config from '../config';
-import AppError from '../errors/AppError';
-import { User } from '../modules/User/user.model';
-import catchAsync from '../utils/catchAsync';
 import { NextFunction, Request, Response } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 
-const auth = () => {
-  return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const token = req.headers.authorization;
-
-    // checking if the token is missing
-    if (!token) {
-      throw new AppError(401, 'You are not authorized!');
+declare global {
+  namespace Express {
+    interface Request {
+      userId: string;
     }
+  }
+}
 
-    // checking if the given token is valid
-    const decoded = jwt.verify(
-      token,
-      config.jwt_access_secret as string,
-    ) as JwtPayload;
+const verifyToken = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<any> | undefined => {
+  const token = req.cookies['auth_token'];
+  if (!token) {
+    // return res.status(401).json({ message: 'unauthorized' });
+    res.status(401).json({
+      error: 'unauthorized',
+    });
+    return;
+  }
 
-    const { email } = decoded;
-
-    // checking if the user is exist
-    const user = await User.isUserExistsByCustomId(email);
-
-    if (!user) {
-      throw new AppError(404, 'This user is not found !');
-    }
-    req.userId = decoded as JwtPayload;
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET as string);
+    req.userId = (decoded as JwtPayload).userId;
     next();
-  });
+  } catch (error) {
+    // return res.status(401).json({ message: 'unauthorized' });
+    res.status(401).json({
+      error: 'unauthorized',
+    });
+    return;
+  }
 };
 
-export default auth;
+export default verifyToken;

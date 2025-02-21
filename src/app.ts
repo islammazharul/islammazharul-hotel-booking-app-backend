@@ -2,13 +2,19 @@ import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import router from './app/routes';
 import { v2 as cloudinary } from 'cloudinary';
-import globalErrorHandler from './app/middleware/globalErrorhandler';
-import notFound from './app/middleware/notFound';
+import cookieParser from 'cookie-parser';
 const app: Application = express();
 
+const corsOptions = {
+  origin: process.env.FRONTEND_URL,
+  credentials: true,
+  optionsSuccessStatus: 200,
+};
+
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+app.use(cors(corsOptions));
 
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
@@ -25,10 +31,5 @@ app.get('/', async (req: Request, res: Response) => {
     message: 'Hotel booking app is running',
   });
 });
-
-app.use(globalErrorHandler as any);
-
-//Not Found
-app.use(notFound as any);
 
 export default app;

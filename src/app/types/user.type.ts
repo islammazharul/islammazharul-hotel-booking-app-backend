@@ -5,7 +5,6 @@ export interface TUser {
   password: string;
   firstName: string;
   lastName: string;
-  isDeleted: boolean;
 }
 
 export interface UserModel extends Model<TUser> {

@@ -1,8 +1,10 @@
 import express from 'express';
-import { UserRoutes } from '../modules/User/user.route';
-import { hotelRoutes } from '../modules/Hotel/hotel.route';
-import { authRoutes } from '../modules/Auth/auth.route';
-import { MyHotelRoute } from '../modules/My-hotel/myHotel.route';
+import { UserRoutes } from '../controllers/user.controller';
+import { AuthRoutes } from '../controllers/auth.controller';
+import { MyHotelRoutes } from '../controllers/my-hotel.controller';
+import { HotelRoutes } from '../controllers/hotel.controller';
+import { HotelBookingRoutes } from '../controllers/hotel-booking.controller';
+import { TicketRoutes } from '../controllers/ticket.controller';
 
 const router = express.Router();
 
@@ -13,19 +15,23 @@ const moduleRoutes = [
   },
   {
     path: '/hotels',
-    route: hotelRoutes,
+    route: HotelRoutes,
   },
   {
-    path: '/',
-    route: MyHotelRoute,
+    path: '/my-hotels',
+    route: MyHotelRoutes,
   },
   {
     path: '/my-bookings',
-    route: hotelRoutes,
+    route: HotelBookingRoutes,
   },
   {
     path: '/auth',
-    route: authRoutes,
+    route: AuthRoutes,
+  },
+  {
+    path: '/ticket',
+    route: TicketRoutes,
   },
 ];
 
