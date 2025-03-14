@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import express, { Request, Response } from 'express';
 import Ticket from '../models/ticket.model';
 
@@ -19,18 +20,21 @@ router.post(
 
       res.status(201).json({ message: 'Support ticket created successfully' });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal server error' });
+      const errMsg =
+        error instanceof Error ? error.message : 'Something went wrong';
+      return res.status(500).json({ message: errMsg });
     }
   },
 );
 
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', async (req: Request, res: Response): Promise<any> => {
   try {
     const tickets = await Ticket.find().sort({ createdAt: -1 });
     res.json(tickets);
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
+    const errMsg =
+      error instanceof Error ? error.message : 'Something went wrong';
+    return res.status(500).json({ message: errMsg });
   }
 });
 
@@ -48,7 +52,9 @@ router.patch(
       );
       res.json({ message: 'Ticket updated successfully', ticket });
     } catch (error) {
-      res.status(500).json({ error: 'Internal server error' });
+      const errMsg =
+        error instanceof Error ? error.message : 'Something went wrong';
+      return res.status(500).json({ message: errMsg });
     }
   },
 );

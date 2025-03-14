@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import express, { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { User } from '../models/user.model';
@@ -19,8 +20,9 @@ router.get(
       }
       res.json(user);
     } catch (error) {
-      console.log(error);
-      res.status(500).json({ message: 'something went wrong' });
+      const errMsg =
+        error instanceof Error ? error.message : 'Something went wrong';
+      return res.status(500).json({ message: errMsg });
     }
   },
 );
@@ -56,8 +58,9 @@ router.post(
       });
       return res.status(200).send({ message: 'User registered OK' });
     } catch (error) {
-      console.log(error);
-      res.status(500).send({ message: 'Something went wrong' });
+      const errMsg =
+        error instanceof Error ? error.message : 'Something went wrong';
+      return res.status(500).json({ message: errMsg });
     }
   },
 );

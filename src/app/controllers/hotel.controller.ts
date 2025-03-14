@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import express, { Request, Response } from 'express';
 import Stripe from 'stripe';
 import Hotel from '../models/hotel.model';
@@ -12,7 +13,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
 const router = express.Router();
 
-router.get('/search', async (req: Request, res: Response) => {
+router.get('/search', async (req: Request, res: Response): Promise<any> => {
   try {
     const query = constructSearchQuery(req.query);
 
@@ -53,8 +54,9 @@ router.get('/search', async (req: Request, res: Response) => {
 
     res.json(response);
   } catch (error) {
-    console.log('error', error);
-    res.status(500).json({ message: 'Something went wrong' });
+    const errMsg =
+      error instanceof Error ? error.message : 'Something went wrong';
+    return res.status(500).json({ message: errMsg });
   }
 });
 
@@ -63,31 +65,24 @@ router.get('/', async (req: Request, res: Response) => {
     const hotels = await Hotel.find().sort('-lastUpdated');
     res.json(hotels);
   } catch (error) {
-    console.log('error', error);
-    res.status(500).json({ message: 'Error fetching hotels' });
+    const errMsg =
+      error instanceof Error ? error.message : 'Error fetching hotel';
+    res.status(500).json({ message: errMsg });
   }
 });
 
-router.get(
-  '/:id',
-  //   [param('id').notEmpty().withMessage('Hotel ID is required')],
-  async (req: Request, res: Response): Promise<any> => {
-    // const errors = validationResult(req);
-    // if (!errors.isEmpty()) {
-    //   return res.status(400).json({ errors: errors.array() });
-    // }
+router.get('/:id', async (req: Request, res: Response) => {
+  const id = req.params.id.toString();
 
-    const id = req.params.id.toString();
-
-    try {
-      const hotel = await Hotel.findById(id);
-      res.json(hotel);
-    } catch (error) {
-      console.log(error);
-      res.status(500).json({ message: 'Error fetching hotel' });
-    }
-  },
-);
+  try {
+    const hotel = await Hotel.findById(id);
+    res.json(hotel);
+  } catch (error) {
+    const errMsg =
+      error instanceof Error ? error.message : 'Error fetching hotel';
+    res.status(500).json({ message: errMsg });
+  }
+});
 
 router.post(
   '/:hotelId/bookings/payment-intent',
@@ -173,8 +168,9 @@ router.post(
       await hotel.save();
       res.status(200).send();
     } catch (error) {
-      console.log(error);
-      res.status(500).json({ message: 'something went wrong' });
+      const errMsg =
+        error instanceof Error ? error.message : 'Something went wrong';
+      return res.status(500).json({ message: errMsg });
     }
   },
 );
@@ -188,7 +184,7 @@ router.post(
         userId: req.userId,
       };
 
-      const hotel = await Hotel.findByIdAndUpdate(
+      const hotel = await Hotel.findById(
         { _id: req.params.hotelId },
         {
           $push: { reviews: newReview },
@@ -200,16 +196,17 @@ router.post(
       }
 
       await hotel.save();
-      res.status(200).send();
+      return res.status(200).send();
     } catch (error) {
-      console.log(error);
-      res.status(500).json({ message: 'something went wrong' });
+      const errMsg =
+        error instanceof Error ? error.message : 'Something went wrong';
+      return res.status(500).json({ message: errMsg });
     }
   },
 );
 
 const constructSearchQuery = (queryParams: any) => {
-  let constructedQuery: any = {};
+  const constructedQuery: Record<string, unknown> = {};
 
   if (queryParams.destination) {
     constructedQuery.$or = [

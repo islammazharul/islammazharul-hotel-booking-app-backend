@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import express, { Request, Response } from 'express';
 import verifyToken from '../middleware/auth';
 import validateRequest from '../middleware/validateRequest';
@@ -12,7 +13,7 @@ router.post(
   verifyToken,
   upload.array('imageFiles', 6),
   validateRequest(hotelValidation.hotelValidationSchema),
-  async (req: Request, res: Response) => {
+  async (req: Request, res: Response): Promise<any> => {
     try {
       const imageFiles = req.files as Express.Multer.File[];
       const newHotel: HotelType = req.body;
@@ -25,24 +26,31 @@ router.post(
 
       const hotel = new Hotel(newHotel);
       await hotel.save();
-      console.log('hotel', hotel);
+      // console.log('hotel', hotel);
 
       res.status(201).send(hotel);
-    } catch (e) {
-      console.log(e);
-      res.status(500).json({ message: 'Something went wrong' });
+    } catch (error) {
+      const errMsg =
+        error instanceof Error ? error.message : 'Something went wrong';
+      return res.status(500).json({ message: errMsg });
     }
   },
 );
 
-router.get('/', verifyToken, async (req: Request, res: Response) => {
-  try {
-    const hotels = await Hotel.find({ userId: req.userId });
-    res.json(hotels);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching hotels' });
-  }
-});
+router.get(
+  '/',
+  verifyToken,
+  async (req: Request, res: Response): Promise<any> => {
+    try {
+      const hotels = await Hotel.find({ userId: req.userId });
+      res.json(hotels);
+    } catch (error) {
+      const errMsg =
+        error instanceof Error ? error.message : 'Error fetching hotels';
+      return res.status(500).json({ message: errMsg });
+    }
+  },
+);
 
 router.get(
   '/:id',
@@ -58,7 +66,9 @@ router.get(
       //   console.log(hotel);
       return res.json(hotel);
     } catch (error) {
-      res.status(500).json({ message: 'Error fetching hotels' });
+      const errMsg =
+        error instanceof Error ? error.message : 'Error fetching hotels';
+      return res.status(500).json({ message: errMsg });
     }
   },
 );
@@ -93,10 +103,11 @@ router.put(
       ];
 
       await hotel.save();
-      console.log(hotel);
       res.status(2001).json(hotel);
     } catch (error) {
-      res.status(500).json({ message: 'Something went wrong' });
+      const errMsg =
+        error instanceof Error ? error.message : 'Something went wrong';
+      return res.status(500).json({ message: errMsg });
     }
   },
 );
