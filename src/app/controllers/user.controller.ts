@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import express, { Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
 import { User } from '../models/user.model';
-import validateRequest from '../middleware/validateRequest';
-import { UserValidation } from '../validations/user.validation';
-import verifyToken from '../middleware/auth';
+import { registerValidationSchema } from '../validations/user.validation';
+import { validateRequest } from '../middleware/validateRequest';
+import { authMiddleware } from '../middleware/authMiddleware';
+import { generateToken } from '../utils/jwt';
 const router = express.Router();
 
 router.get(
   '/me',
-  verifyToken,
+  authMiddleware,
   async (req: Request, res: Response): Promise<any | undefined> => {
     const userId = req.userId;
 
@@ -29,38 +29,38 @@ router.get(
 
 router.post(
   '/register',
-  validateRequest(UserValidation.userValidationSchema),
   async (req: Request, res: Response): Promise<any | undefined> => {
     try {
-      let user = await User.findOne({
-        email: req.body.email,
-      });
+      const validateData = validateRequest(registerValidationSchema, req.body);
 
-      if (user) {
+      const existingUser = await User.findOne({ email: validateData.email });
+      if (existingUser) {
         return res.status(400).json({ message: 'User already exists' });
       }
 
-      user = new User(req.body);
+      const user = new User({
+        firstName: validateData.firstName,
+        lastName: validateData.lastName,
+        email: validateData.email,
+        password: validateData.password,
+      });
       await user.save();
 
-      const token = jwt.sign(
-        { userId: user.id },
-        process.env.JWT_ACCESS_SECRET as string,
-        {
-          expiresIn: process.env.JWT_ACCESS_EXPIRES_IN,
-        },
-      );
+      const token = generateToken(user._id.toString());
 
-      res.cookie('auth_token', token, {
+      res.cookie('token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'development',
         maxAge: 86400000,
+        sameSite: 'strict',
       });
-      return res.status(200).send({ message: 'User registered OK' });
+
+      res.status(201).json({ message: 'User registered successfully', user });
     } catch (error) {
-      const errMsg =
-        error instanceof Error ? error.message : 'Something went wrong';
-      return res.status(500).json({ message: errMsg });
+      if (error instanceof Error) {
+        return res.status(400).json({ message: error.message });
+      }
+      res.status(500).json({ message: 'Server error', error });
     }
   },
 );

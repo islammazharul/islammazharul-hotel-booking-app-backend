@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import express, { Request, Response } from 'express';
-import verifyToken from '../middleware/auth';
 import Hotel from '../models/hotel.model';
 import { BookingType, HotelType } from '../types/hotel.type';
+import { authMiddleware } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
 // /api/my-bookings
 router.get(
   '/',
-  verifyToken,
+  authMiddleware,
   async (req: Request, res: Response): Promise<any> => {
     try {
       const hotels = await Hotel.find({

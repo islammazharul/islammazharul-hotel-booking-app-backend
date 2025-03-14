@@ -1,18 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import express, { Request, Response } from 'express';
-import verifyToken from '../middleware/auth';
-import validateRequest from '../middleware/validateRequest';
-import { hotelValidation } from '../validations/hotel.validation';
 import { sendImageToCloudinary, upload } from '../utils/sendImageToCloudinary';
 import { HotelType } from '../types/hotel.type';
 import Hotel from '../models/hotel.model';
+import { authMiddleware } from '../middleware/authMiddleware';
 
 const router = express.Router();
 router.post(
   '/',
-  verifyToken,
+  authMiddleware,
   upload.array('imageFiles', 6),
-  validateRequest(hotelValidation.hotelValidationSchema),
+  // validateRequest(hotelValidation.hotelValidationSchema),
   async (req: Request, res: Response): Promise<any> => {
     try {
       const imageFiles = req.files as Express.Multer.File[];
@@ -22,7 +20,7 @@ router.post(
 
       newHotel.imageUrls = imageUrls;
       newHotel.lastUpdated = new Date();
-      newHotel.userId = req.userId;
+      newHotel.userId = req.userId as string;
 
       const hotel = new Hotel(newHotel);
       await hotel.save();
@@ -39,7 +37,7 @@ router.post(
 
 router.get(
   '/',
-  verifyToken,
+  authMiddleware,
   async (req: Request, res: Response): Promise<any> => {
     try {
       const hotels = await Hotel.find({ userId: req.userId });
@@ -54,7 +52,7 @@ router.get(
 
 router.get(
   '/:id',
-  verifyToken,
+  authMiddleware,
   async (req: Request, res: Response): Promise<any> => {
     const id = req.params.id.toString(); /* find hotel id */
     // console.log(id);
@@ -75,9 +73,9 @@ router.get(
 
 router.put(
   '/:hotelId',
-  verifyToken,
+  authMiddleware,
   upload.array('imageFiles'),
-  validateRequest(hotelValidation.hotelValidationSchema),
+  // validateRequest(hotelValidation.hotelValidationSchema),
   async (req: Request, res: Response): Promise<any> => {
     try {
       const updatedHotel: HotelType = req.body;

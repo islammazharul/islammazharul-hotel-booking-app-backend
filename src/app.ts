@@ -6,9 +6,10 @@ import cookieParser from 'cookie-parser';
 const app: Application = express();
 
 const corsOptions = {
-  origin: process.env.FRONTEND_URL,
-  credentials: true,
-  optionsSuccessStatus: 200,
+  origin: process.env.FRONTEND_URL as string, // Allow your frontend
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true, // Allow cookies if needed
 };
 
 app.use(cookieParser());
@@ -21,7 +22,7 @@ cloudinary.config({
   api_key: process.env.API_KEY,
   api_secret: process.env.API_SECRET,
 });
-
+app.options('*', cors());
 // application routes
 app.use('/api', router);
 

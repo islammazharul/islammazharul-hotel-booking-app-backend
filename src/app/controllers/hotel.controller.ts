@@ -7,7 +7,7 @@ import {
   HotelSearchResponse,
   ReviewType,
 } from '../types/hotel.type';
-import verifyToken from '../middleware/auth';
+import { authMiddleware } from '../middleware/authMiddleware';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
@@ -86,7 +86,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 
 router.post(
   '/:hotelId/bookings/payment-intent',
-  verifyToken,
+  authMiddleware,
   async (req: Request, res: Response): Promise<any> => {
     const { numberOfNights } = req.body;
     const hotelId = req.params.hotelId;
@@ -103,7 +103,7 @@ router.post(
       currency: 'usd',
       metadata: {
         hotelId,
-        userId: req.userId,
+        userId: req.userId as string,
       },
     });
 
@@ -123,7 +123,7 @@ router.post(
 
 router.post(
   '/:hotelId/bookings',
-  verifyToken,
+  authMiddleware,
   async (req: Request, res: Response): Promise<any> => {
     try {
       const paymentIntentId = req.body.paymentIntentId;
